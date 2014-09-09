@@ -11,3 +11,4 @@ C:\Users\James\Documents\GitHub\UAVBaseStationv1\BaseStationv1\BaseStationv1\obj
 C:\Users\James\Documents\GitHub\UAVBaseStationv1\BaseStationv1\BaseStationv1\obj\Debug\BaseStationv1.csproj.GenerateResource.Cache
 C:\Users\James\Documents\GitHub\UAVBaseStationv1\BaseStationv1\BaseStationv1\obj\Debug\BaseStationv1.exe
 C:\Users\James\Documents\GitHub\UAVBaseStationv1\BaseStationv1\BaseStationv1\obj\Debug\BaseStationv1.pdb
+C:\Users\James\Documents\GitHub\UAVBaseStationv1\BaseStationv1\BaseStationv1\bin\Debug\MjpegProcessor.dll

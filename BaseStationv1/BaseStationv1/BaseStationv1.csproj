@@ -35,6 +35,9 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="MjpegProcessor">
+      <HintPath>..\..\..\..\..\Working Folder\Senior Design\MJPEG Decoder\MJPEG_bin\MjpegProcessor.dll</HintPath>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Data" />
     <Reference Include="System.Xml" />

@@ -12,6 +12,7 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
+using MjpegProcessor;
 
 namespace BaseStationv1
 {
@@ -20,9 +21,45 @@ namespace BaseStationv1
     /// </summary>
     public partial class MainWindow : Window
     {
+        private MjpegDecoder streamDecoder;
         public MainWindow()
         {
             InitializeComponent();
+
+            // Instantiate new decoder
+            streamDecoder = new MjpegDecoder();
+
+            // Set FrameReady event handler
+            streamDecoder.FrameReady += mjpeg_FrameReady;
+
+            // Set error event handler
+            streamDecoder.Error += mjpeg_Error;
+
+        }
+
+        // Event handler for MjpegDecoder FrameReady event
+        private void mjpeg_FrameReady(object sender, FrameReadyEventArgs e)
+        {
+            this.imgStreamDisplay.Source = e.BitmapImage;
+        }
+
+        // Event handler for MjpegDecoder error
+        private void mjpeg_Error(object sender, ErrorEventArgs e)
+        {
+            MessageBox.Show(e.Message);
+        }
+
+        private void btnStartCapture_Click(object sender, RoutedEventArgs e)
+        {
+            try
+            {
+                streamDecoder.ParseStream(new Uri(this.txbURI.Text.ToString()));
+            }
+            catch(Exception err)
+            {
+                // Display error message
+                MessageBox.Show(err.Message);
+            }            
         }
     }
 }
