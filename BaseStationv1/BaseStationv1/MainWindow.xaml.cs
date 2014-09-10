@@ -35,6 +35,10 @@ namespace BaseStationv1
             // Set error event handler
             streamDecoder.Error += mjpeg_Error;
 
+            // Set no data image
+            BitmapImage noDataPic = new BitmapImage(new Uri("images/NoData.png", UriKind.Relative));
+            this.imgStreamDisplay.Source = noDataPic;
+
         }
 
         // Event handler for MjpegDecoder FrameReady event

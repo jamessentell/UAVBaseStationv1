@@ -1,13 +1,13 @@
 ﻿<Window x:Class="BaseStationv1.MainWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        Title="Base Station" Height="350" Width="492">
+        Title="Base Station" Height="580" Width="740">
     <Grid>
         <Label Content="URI:" HorizontalAlignment="Left" Margin="68,10,0,0" VerticalAlignment="Top" Name="lblURI"/>
 
-        <Image HorizontalAlignment="Left" Height="247" Margin="24,41,0,0" VerticalAlignment="Top" Width="440" Name="imgStreamDisplay" Stretch="Fill"/>
-        <TextBox HorizontalAlignment="Left" Height="23" Margin="104,12,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="120" Name="txbURI"/>
-        <Button Content="Start Stream Capture" HorizontalAlignment="Left" Margin="305,12,0,0" VerticalAlignment="Top" Width="123" Name="btnStartCapture" Click="btnStartCapture_Click"/>
+        <Image HorizontalAlignment="Left" Height="480" Margin="44,44,0,0" VerticalAlignment="Top" Width="640" Name="imgStreamDisplay" Stretch="None"/>
+        <TextBox HorizontalAlignment="Left" Height="23" Margin="104,12,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="278" Name="txbURI" Text="http://192.168.1.126:8080/?action=stream"/>
+        <Button Content="Start Stream Capture" HorizontalAlignment="Left" Margin="400,12,0,0" VerticalAlignment="Top" Width="123" Name="btnStartCapture" Click="btnStartCapture_Click"/>
 
 
     </Grid>
