@@ -6,7 +6,7 @@
         <Label Content="URI:" HorizontalAlignment="Left" Margin="68,10,0,0" VerticalAlignment="Top" Name="lblURI"/>
 
         <Image HorizontalAlignment="Left" Height="480" Margin="44,44,0,0" VerticalAlignment="Top" Width="640" Name="imgStreamDisplay" Stretch="None"/>
-        <TextBox HorizontalAlignment="Left" Height="23" Margin="104,12,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="278" Name="txbURI" Text="http://192.168.1.126:8080/?action=stream"/>
+        <TextBox HorizontalAlignment="Left" Height="23" Margin="104,12,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="278" Name="txbURI" Text="http://192.168.1.149:8080/?action=stream"/>
         <Button Content="Start Stream Capture" HorizontalAlignment="Left" Margin="400,12,0,0" VerticalAlignment="Top" Width="123" Name="btnStartCapture" Click="btnStartCapture_Click"/>
 
 
