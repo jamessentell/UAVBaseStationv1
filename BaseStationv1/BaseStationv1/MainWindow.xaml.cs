@@ -13,6 +13,8 @@ using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
 using MjpegProcessor;
+using System.Net.Sockets;
+using System.Net;
 
 namespace BaseStationv1
 {
@@ -24,6 +26,7 @@ namespace BaseStationv1
         private MjpegDecoder streamDecoder;
         public MainWindow()
         {
+            // Initialize the window
             InitializeComponent();
 
             // Instantiate new decoder
@@ -64,6 +67,40 @@ namespace BaseStationv1
                 // Display error message
                 MessageBox.Show(err.Message);
             }            
+        }
+
+        private void btnStopCapture_Click(object sender, RoutedEventArgs e)
+        {
+            // Stop stream
+            streamDecoder.StopStream();
+        }
+
+        // Called when the test button is clicked
+        private void btnTest_Click(object sender, RoutedEventArgs e)
+        {
+            try
+            {
+                // Test sending a packet
+                Socket sock = new Socket(AddressFamily.InterNetwork, SocketType.Stream,
+                ProtocolType.Tcp);
+
+                IPAddress serverAddr = IPAddress.Parse("192.168.1.126");
+
+                IPEndPoint endPoint = new IPEndPoint(serverAddr, 2619);
+
+                string text = "Hello";
+                byte[] send_buffer = Encoding.ASCII.GetBytes(text);
+
+                sock.Connect(endPoint);
+
+                sock.SendTo(send_buffer, endPoint);
+
+                sock.Close();
+            }
+            catch(Exception ex)
+            {
+                MessageBox.Show(ex.Message);
+            }
         }
     }
 }
