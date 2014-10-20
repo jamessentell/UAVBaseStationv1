@@ -88,12 +88,26 @@ namespace BaseStationv1
 
                 IPEndPoint endPoint = new IPEndPoint(serverAddr, 2619);
 
-                string text = "Hello";
-                byte[] send_buffer = Encoding.ASCII.GetBytes(text);
-
                 sock.Connect(endPoint);
 
-                sock.SendTo(send_buffer, endPoint);
+                EndPoint thisEP = new IPEndPoint(IPAddress.Any, 2619);
+                byte[] response = new byte[8000];
+                sock.ReceiveFrom(response, ref thisEP);
+                PiBlimpPacket receivedPacket = new PiBlimpPacket();
+                receivedPacket.importByteArray(response);
+
+                if(receivedPacket.pType == PiBlimpPacketType.ConnectionEstablished)
+                {
+                    // Set up a getPWM packet
+                    PiBlimpPacket packet = new PiBlimpPacket();
+                    packet.pType = PiBlimpPacketType.GetPWM;
+                    byte[] array = packet.generateByteArray();
+                    sock.SendTo(array, endPoint);
+                }
+                else
+                {
+                    MessageBox.Show("Error: Connection not established.");
+                }
 
                 sock.Close();
             }
