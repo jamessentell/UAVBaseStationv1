@@ -15,15 +15,31 @@ using System.Windows.Shapes;
 using MjpegProcessor;
 using System.Net.Sockets;
 using System.Net;
+using System.Windows.Forms;
 
 namespace BaseStationv1
 {
+    public class MOTOR_CONSTANTS
+    {
+        public const int LEFT_MOTOR = 1;
+        public const int RIGHT_MOTOR = 2;
+        public const int LEFT_SERVO = 3;
+        public const int RIGHT_SERVO = 4;
+        public const int FORWARD = 1;
+        public const int REVERSE = 2;
+    }
+
+        
     /// <summary>
     /// Interaction logic for MainWindow.xaml
     /// </summary>
     public partial class MainWindow : Window
     {
         private MjpegDecoder streamDecoder;
+        private bool captureKeys;
+        private int throttleValue;
+        private int servoElevationAngle;
+        
         public MainWindow()
         {
             // Initialize the window
@@ -42,6 +58,11 @@ namespace BaseStationv1
             BitmapImage noDataPic = new BitmapImage(new Uri("images/NoData.png", UriKind.Relative));
             this.imgStreamDisplay.Source = noDataPic;
 
+            // Set global variables
+            throttleValue = 0;
+            captureKeys = false;
+            servoElevationAngle = 100;          
+
         }
 
         // Event handler for MjpegDecoder FrameReady event
@@ -53,7 +74,7 @@ namespace BaseStationv1
         // Event handler for MjpegDecoder error
         private void mjpeg_Error(object sender, ErrorEventArgs e)
         {
-            MessageBox.Show(e.Message);
+            System.Windows.MessageBox.Show(e.Message);
         }
 
         private void btnStartCapture_Click(object sender, RoutedEventArgs e)
@@ -65,7 +86,7 @@ namespace BaseStationv1
             catch(Exception err)
             {
                 // Display error message
-                MessageBox.Show(err.Message);
+                System.Windows.MessageBox.Show(err.Message);
             }            
         }
 
@@ -92,6 +113,7 @@ namespace BaseStationv1
 
                 EndPoint thisEP = new IPEndPoint(IPAddress.Any, 2619);
                 byte[] response = new byte[8000];
+                sock.ReceiveTimeout = 5000;
                 sock.ReceiveFrom(response, ref thisEP);
                 PiBlimpPacket receivedPacket = new PiBlimpPacket();
                 receivedPacket.importByteArray(response);
@@ -100,21 +122,91 @@ namespace BaseStationv1
                 {
                     // Set up a getPWM packet
                     PiBlimpPacket packet = new PiBlimpPacket();
-                    packet.pType = PiBlimpPacketType.GetPWM;
-                    byte[] array = packet.generateByteArray();
+                    byte[] array = packet.getPacket(PiBlimpPacketType.GetPWM);
                     sock.SendTo(array, endPoint);
                 }
                 else
                 {
-                    MessageBox.Show("Error: Connection not established.");
+                    System.Windows.MessageBox.Show("Error: Connection not established.");
                 }
 
-                sock.Close();
+                //sock.Close();
             }
             catch(Exception ex)
             {
-                MessageBox.Show(ex.Message);
+                System.Windows.MessageBox.Show(ex.Message);
             }
         }
+
+        private void btnToggleKeys_Click(object sender, RoutedEventArgs e)
+        {
+            captureKeys = !captureKeys;
+        }
+
+        // WASD for steering
+        // I/K increases/decreases elevation angle
+        // O/L increases/decreases elevation angle
+        private void MainWindow_KeyDown(object sender, System.Windows.Input.KeyEventArgs e)
+        {
+            if(captureKeys)
+            {
+                PiBlimpPacket packet = new PiBlimpPacket();
+                byte[] packetArray;
+                switch(e.Key.ToString())
+                {
+                    case "W":
+                        
+                        // getPacket(packetType, motor_1_id, motor_1_fwd/rev, motor_1_power, motor_2_id, motor_2_power, motor_2_power
+                        packetArray = packet.getPacket(PiBlimpPacketType.SetPWM, MOTOR_CONSTANTS.LEFT_MOTOR, MOTOR_CONSTANTS.FORWARD, throttleValue, MOTOR_CONSTANTS.RIGHT_MOTOR, MOTOR_CONSTANTS.FORWARD, throttleValue, MOTOR_CONSTANTS.LEFT_SERVO, 0, servoElevationAngle, MOTOR_CONSTANTS.RIGHT_SERVO, 0, servoElevationAngle);
+                        break;
+                    case "A":
+                        System.Windows.MessageBox.Show("Both Back");
+                        break;
+                    case "S":
+                        System.Windows.MessageBox.Show("Both Back");
+                        break;
+                    case "D":
+                        System.Windows.MessageBox.Show("Rotate Left");
+                        break;
+                    case "O":
+                        if(throttleValue != 100)
+                        {
+                            throttleValue++;
+                        }                        
+                        break;
+                    case "L":
+                        if(throttleValue != 0)
+                        {
+                            throttleValue--;
+                        }
+                        break;
+                    case "I":
+                        if(servoElevationAngle != 100)
+                        {
+                            servoElevationAngle++;
+                        }
+                        break;
+                    case "K":
+                        if(servoElevationAngle != 0)
+                        {
+                            servoElevationAngle--;
+                        }
+                        break;
+                    default:
+                        break;
+                }
+
+                lblThrottleValue.Content = throttleValue.ToString();
+                lblElevationAngle.Content = servoElevationAngle.ToString();
+
+                // Send the packet (if necessary)
+                int i = 0;
+                i++;
+            }
+            
+        }
+
+
+
     }
 }
