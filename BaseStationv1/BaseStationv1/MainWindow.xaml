@@ -15,13 +15,15 @@
         <TextBox HorizontalAlignment="Left" Height="23" Margin="104,12,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="278" Name="txbURI" Text="http://192.168.1.149:8080/?action=stream"/>
         <Button Content="Start Stream Capture" HorizontalAlignment="Left" Margin="410,12,0,0" VerticalAlignment="Top" Width="123" Name="btnStartCapture" Click="btnStartCapture_Click" Grid.ColumnSpan="2"/>
         <Button Name="btnStopCapture" Content="Stop Stream Capture" HorizontalAlignment="Left" Margin="44,12,0,0" VerticalAlignment="Top" Width="123" Click="btnStopCapture_Click" Grid.Column="1"/>
-        <Button x:Name="btnTest" Content="Test" HorizontalAlignment="Left" Margin="198,44,0,0" VerticalAlignment="Top" Width="123" Click="btnTest_Click" Grid.Column="1"/>
+        <Button x:Name="btnTest" Content="Test" HorizontalAlignment="Left" Margin="197,44,0,0" VerticalAlignment="Top" Width="134" Click="btnTest_Click" Grid.Column="1"/>
         <Label Content="Control Buttons" HorizontalAlignment="Left" Margin="198,10,0,0" VerticalAlignment="Top" Width="123" Grid.Column="1"/>
-        <Button x:Name="btnToggleKeys" Content="Toggle Key Capture" HorizontalAlignment="Left" Margin="198,86,0,0" VerticalAlignment="Top" Width="123" Click="btnToggleKeys_Click" Grid.Column="1"/>
-        <Label Content="Throttle Value:" HorizontalAlignment="Left" Margin="198,132,0,0" VerticalAlignment="Top" RenderTransformOrigin="-0.046,0.692" Grid.Column="1"/>
-        <Label x:Name="lblThrottleValue" Content="0" HorizontalAlignment="Left" Margin="290,132,0,0" VerticalAlignment="Top" RenderTransformOrigin="2.25,0.462" Width="41" HorizontalContentAlignment="Center" Grid.Column="1"/>
-        <Label Content="Elevation Value" HorizontalAlignment="Left" Margin="198,163,0,0" VerticalAlignment="Top" RenderTransformOrigin="-0.046,0.692" Grid.Column="1"/>
-        <Label x:Name="lblElevationAngle" Content="100" HorizontalAlignment="Left" Margin="290,163,0,0" VerticalAlignment="Top" RenderTransformOrigin="2.25,0.462" Width="41" HorizontalContentAlignment="Center" Grid.Column="1"/>
+        <Button x:Name="btnToggleKeys" Content="Toggle Key Capture" HorizontalAlignment="Left" Margin="197,114,0,0" VerticalAlignment="Top" Width="134" Click="btnToggleKeys_Click" Grid.Column="1"/>
+        <Label Content="Throttle Value:" HorizontalAlignment="Left" Margin="198,160,0,0" VerticalAlignment="Top" RenderTransformOrigin="-0.046,0.692" Grid.Column="1"/>
+        <Label x:Name="lblThrottleValue" Content="0" HorizontalAlignment="Left" Margin="290,160,0,0" VerticalAlignment="Top" RenderTransformOrigin="2.25,0.462" Width="41" HorizontalContentAlignment="Center" Grid.Column="1"/>
+        <Label Content="Elevation Value" HorizontalAlignment="Left" Margin="198,191,0,0" VerticalAlignment="Top" RenderTransformOrigin="-0.046,0.692" Grid.Column="1"/>
+        <Label x:Name="lblElevationAngle" Content="100" HorizontalAlignment="Left" Margin="290,191,0,0" VerticalAlignment="Top" RenderTransformOrigin="2.25,0.462" Width="41" HorizontalContentAlignment="Center" Grid.Column="1"/>
+        <Button x:Name="btnConnect" Content="Connect" Grid.Column="1" HorizontalAlignment="Left" Margin="198,80,0,0" VerticalAlignment="Top" Width="55" Click="btnConnect_Click"/>
+        <Button x:Name="btnDisconnect" Content="Disconnect" Grid.Column="1" HorizontalAlignment="Left" Margin="258,80,0,0" VerticalAlignment="Top" Width="73" Click="btnDisconnect_Click"/>
 
 
     </Grid>
