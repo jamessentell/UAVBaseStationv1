@@ -60,6 +60,7 @@ namespace BaseStationv1
         private string piIpAddress;
         private int portNum;
         private System.Timers.Timer keepAliveTimer;
+        private Boolean constructorRan = false;
         
         public MainWindow()
         {
@@ -85,7 +86,7 @@ namespace BaseStationv1
             servoElevationAngle = 100;
 
             // Set up socket variable
-            piIpAddress = "192.168.1.126";
+            piIpAddress = "192.168.1.126";           
             this.socket = new Socket(AddressFamily.InterNetwork, SocketType.Stream,
                 ProtocolType.Tcp);
             portNum = 2619;
@@ -94,13 +95,26 @@ namespace BaseStationv1
             this.keepAliveTimer = new System.Timers.Timer(500);
             this.keepAliveTimer.Elapsed += new ElapsedEventHandler(sendKeepAlivePacket);
 
+            // Initialize uri string
+            this.txbURI.Text = "http://" + this.piIpAddress.ToString() + ":8080/?action=stream";
 
+            this.constructorRan = true;
         }
 
         private void sendKeepAlivePacket(object source, ElapsedEventArgs e)
         {
-            PiBlimpPacket packet = new PiBlimpPacket();
-            this.socket.Send(packet.getPacket(PiBlimpPacketType.KeepAlive));
+            try
+            {
+                PiBlimpPacket packet = new PiBlimpPacket();
+                byte[] temp = packet.getPacket(PiBlimpPacketType.KeepAlive);
+                this.socket.Send(temp);
+            }
+            catch(Exception ex)
+            {
+                System.Console.WriteLine(ex.Message);
+                
+            }
+            
         }
 
         // Event handler for MjpegDecoder FrameReady event
@@ -138,21 +152,14 @@ namespace BaseStationv1
         // Called when the test button is clicked
         private void btnTest_Click(object sender, RoutedEventArgs e)
         {
-            try
-            {
-                if(SocketExtensions.IsConnected(this.socket))
-                {
-                    System.Windows.MessageBox.Show("Connected");
-                }
-                else
-                {
-                    System.Windows.MessageBox.Show("Not Connected");
-                }
-            }
-            catch(Exception ex)
-            {
-                System.Windows.MessageBox.Show(ex.Message);
-            }
+            PiBlimpPacket packet = new PiBlimpPacket();
+            byte[] array1 = packet.getPacket(PiBlimpPacketType.SetPWM, MOTOR_CONSTANTS.LEFT_MOTOR, MOTOR_CONSTANTS.FORWARD, 40);
+            socket.Send(array1);
+
+            System.Threading.Thread.Sleep(2000);
+
+            byte[] array2 = packet.getPacket(PiBlimpPacketType.SetPWM, MOTOR_CONSTANTS.LEFT_MOTOR, MOTOR_CONSTANTS.FORWARD, 0);
+            socket.Send(array2);
         }
 
         private void btnToggleKeys_Click(object sender, RoutedEventArgs e)
@@ -222,6 +229,10 @@ namespace BaseStationv1
                     case "Q":
                         // Stop all motors
                         packetArray = packet.getPacket(PiBlimpPacketType.SetPWM, MOTOR_CONSTANTS.LEFT_MOTOR, MOTOR_CONSTANTS.FORWARD, 0, MOTOR_CONSTANTS.RIGHT_MOTOR, MOTOR_CONSTANTS.FORWARD, 0, MOTOR_CONSTANTS.LEFT_SERVO, 0, 100, MOTOR_CONSTANTS.RIGHT_SERVO, 0, 100);
+                        this.servoElevationAngle = 100;
+                        this.throttleValue = 0;
+                        this.lblElevationAngle.Content = servoElevationAngle.ToString();
+                        this.lblThrottleValue.Content = throttleValue.ToString();
                         break;
                     default:
                         break;
@@ -253,10 +264,16 @@ namespace BaseStationv1
             bool result = this.connectSocket();
             if(result)
             {
-                System.Windows.MessageBox.Show("Connected to " + piIpAddress);
-
                 // Enable keep alive timer
-                this.keepAliveTimer.Enabled = true;                
+                if(this.keepAliveTimer == null)
+                {
+                    this.keepAliveTimer = new System.Timers.Timer(500);
+                }
+                this.keepAliveTimer.Elapsed += new ElapsedEventHandler(sendKeepAlivePacket);
+                this.keepAliveTimer.Enabled = true;
+                
+
+                System.Windows.MessageBox.Show("Connected to " + piIpAddress);              
             }
             else
             {
@@ -272,6 +289,7 @@ namespace BaseStationv1
                 // Close the socket connection
                 socket.Close();
                 keepAliveTimer.Enabled = false;
+                keepAliveTimer = null;
 
                 System.Windows.MessageBox.Show("Connection to " + piIpAddress + " closed.");
             }
@@ -319,6 +337,22 @@ namespace BaseStationv1
             {
                 return false;
             }            
+        }
+
+        private void txbIpAddress_TextChanged(object sender, TextChangedEventArgs e)
+        {
+            if(this.constructorRan)
+            {
+                this.portNum = 2619;
+                this.piIpAddress = txbIpAddress.Text;
+
+                if (SocketExtensions.IsConnected(this.socket))
+                {
+                    socket.Close();
+                    connectSocket();
+                }                
+                this.txbURI.Text = "http://" + this.piIpAddress.ToString() + ":8080/?action=stream";
+            }
         }
     }
 }
