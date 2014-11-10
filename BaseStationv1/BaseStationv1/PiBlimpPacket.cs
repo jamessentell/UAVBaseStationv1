@@ -13,6 +13,9 @@ namespace BaseStationv1
         ConnectionEstablished,
         ConnectionClose,
         UnknownType,
+        StartVideoStream,
+        StopVideoStream,
+        RestartVideoStream,
         KeepAlive
     };
 
@@ -72,6 +75,18 @@ namespace BaseStationv1
                     break;
                 case PiBlimpPacketType.KeepAlive:
                     bArray[0] = 1;
+                    break;
+                case PiBlimpPacketType.StartVideoStream:
+                    bArray[0] = 50;
+                    bArray[0] = 1;
+                    break;
+                case PiBlimpPacketType.StopVideoStream:
+                    bArray[0] = 50;
+                    bArray[1] = 0;
+                    break;
+                case PiBlimpPacketType.RestartVideoStream:
+                    bArray[0] = 50;
+                    bArray[1] = 2;
                     break;
                 default:
                     break;

@@ -61,6 +61,7 @@ namespace BaseStationv1
         private int portNum;
         private System.Timers.Timer keepAliveTimer;
         private Boolean constructorRan = false;
+        private bool videoStreamUp;
         
         public MainWindow()
         {
@@ -99,6 +100,7 @@ namespace BaseStationv1
             this.txbURI.Text = "http://" + this.piIpAddress.ToString() + ":8080/?action=stream";
 
             this.constructorRan = true;
+            videoStreamUp = false;
         }
 
         private void sendKeepAlivePacket(object source, ElapsedEventArgs e)
@@ -132,21 +134,41 @@ namespace BaseStationv1
 
         private void btnStartCapture_Click(object sender, RoutedEventArgs e)
         {
+            this.establishConnection();
             try
             {
+                // Send packet to start video stream
+                if(this.videoStreamUp == false)
+                {
+                    PiBlimpPacket packet = new PiBlimpPacket();
+                    byte[] array = packet.getPacket(PiBlimpPacketType.StartVideoStream);
+                    socket.Send(array);                    
+                }
+                else
+                {
+                    PiBlimpPacket packet = new PiBlimpPacket();
+                    byte[] array = packet.getPacket(PiBlimpPacketType.RestartVideoStream);
+                    socket.Send(array);  
+                }
                 streamDecoder.ParseStream(new Uri(this.txbURI.Text.ToString()));
+                this.videoStreamUp = true;
             }
             catch(Exception err)
             {
                 // Display error message
                 System.Windows.MessageBox.Show(err.Message);
+                this.videoStreamUp = false;
             }            
         }
 
         private void btnStopCapture_Click(object sender, RoutedEventArgs e)
         {
             // Stop stream
+            PiBlimpPacket packet = new PiBlimpPacket();
+            byte[] array = packet.getPacket(PiBlimpPacketType.StopVideoStream);
+            socket.Send(array);
             streamDecoder.StopStream();
+            this.videoStreamUp = false;
         }
 
         // Called when the test button is clicked
@@ -258,33 +280,41 @@ namespace BaseStationv1
             }            
         }
 
-        // Establish the TCP Connection
-        private void btnConnect_Click(object sender, RoutedEventArgs e)
+        // Initializes and establishes the socket connection to the raspberry pi
+        private void establishConnection()
         {
-            bool result = this.connectSocket();
-            if(result)
+            if(!SocketExtensions.IsConnected(socket))
             {
-                // Enable keep alive timer
-                if(this.keepAliveTimer == null)
+                bool result = this.connectSocket();
+                if (result)
                 {
-                    this.keepAliveTimer = new System.Timers.Timer(500);
-                }
-                this.keepAliveTimer.Elapsed += new ElapsedEventHandler(sendKeepAlivePacket);
-                this.keepAliveTimer.Enabled = true;
-                
+                    // Enable keep alive timer
+                    if (this.keepAliveTimer == null)
+                    {
+                        this.keepAliveTimer = new System.Timers.Timer(500);
+                    }
+                    this.keepAliveTimer.Elapsed += new ElapsedEventHandler(sendKeepAlivePacket);
+                    this.keepAliveTimer.Enabled = true;
 
-                System.Windows.MessageBox.Show("Connected to " + piIpAddress);              
+
+                    System.Windows.MessageBox.Show("Connected to " + piIpAddress);
+                }
+                else
+                {
+                    System.Windows.MessageBox.Show("Could not connect to " + piIpAddress);
+                }
             }
             else
             {
-                System.Windows.MessageBox.Show("Could not connect to " + piIpAddress);
+                System.Windows.MessageBox.Show("Already connected to " + piIpAddress);
             }
+           
         }
 
-        // Disconnect from the Pi
-        private void btnDisconnect_Click(object sender, RoutedEventArgs e)
+        // Closes the socket connection to the raspberry pi
+        private void closeConnection()
         {
-            if(SocketExtensions.IsConnected(this.socket))
+            if (SocketExtensions.IsConnected(this.socket))
             {
                 // Close the socket connection
                 socket.Close();
@@ -297,7 +327,18 @@ namespace BaseStationv1
             {
                 System.Windows.MessageBox.Show("Socket was not connected.");
             }
-            
+        }
+
+        // Establish the TCP Connection
+        private void btnConnect_Click(object sender, RoutedEventArgs e)
+        {
+            this.establishConnection();
+        }
+
+        // Disconnect from the Pi
+        private void btnDisconnect_Click(object sender, RoutedEventArgs e)
+        {
+            this.closeConnection();            
         }
 
         private bool connectSocket()
