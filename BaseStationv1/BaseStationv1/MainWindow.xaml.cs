@@ -18,12 +18,15 @@ using System.Net;
 using System.Windows.Forms;
 using System.Timers;
 
+using SharpDX.XInput;
+
+
 namespace BaseStationv1
 {
     public class MOTOR_CONSTANTS
     {
-        public const int LEFT_MOTOR = 1;
-        public const int RIGHT_MOTOR = 2;
+        public const int LEFT_MOTOR = 2;
+        public const int RIGHT_MOTOR = 1;
         public const int LEFT_SERVO = 3;
         public const int RIGHT_SERVO = 4;
         public const int FORWARD = 1;
@@ -87,7 +90,20 @@ namespace BaseStationv1
             servoElevationAngle = 100;
 
             // Set up socket variable
-            piIpAddress = "192.168.1.126";           
+
+            // Attempt to locate pi address
+
+            IPAddress[] addresses = Dns.GetHostAddresses("piblimp.");
+
+            if(addresses.Length > 0)
+            {
+                piIpAddress = addresses[0].ToString();
+            }
+            else
+            {
+                piIpAddress = "192.168.1.126";
+            }
+                       
             this.socket = new Socket(AddressFamily.InterNetwork, SocketType.Stream,
                 ProtocolType.Tcp);
             portNum = 2619;
@@ -134,22 +150,22 @@ namespace BaseStationv1
 
         private void btnStartCapture_Click(object sender, RoutedEventArgs e)
         {
-            this.establishConnection();
+            //this.establishConnection();
             try
             {
                 // Send packet to start video stream
-                if(this.videoStreamUp == false)
-                {
-                    PiBlimpPacket packet = new PiBlimpPacket();
-                    byte[] array = packet.getPacket(PiBlimpPacketType.StartVideoStream);
-                    socket.Send(array);                    
-                }
-                else
-                {
-                    PiBlimpPacket packet = new PiBlimpPacket();
-                    byte[] array = packet.getPacket(PiBlimpPacketType.RestartVideoStream);
-                    socket.Send(array);  
-                }
+                //if(this.videoStreamUp == false)
+                //{
+                PiBlimpPacket packet = new PiBlimpPacket();
+                byte[] array = packet.getPacket(PiBlimpPacketType.StartVideoStream);
+                socket.Send(array);                    
+                //}
+                //else
+                //{
+                //    PiBlimpPacket packet = new PiBlimpPacket();
+                //    byte[] array = packet.getPacket(PiBlimpPacketType.RestartVideoStream);
+                //    socket.Send(array);  
+               //}
                 streamDecoder.ParseStream(new Uri(this.txbURI.Text.ToString()));
                 this.videoStreamUp = true;
             }
@@ -394,6 +410,35 @@ namespace BaseStationv1
                 }                
                 this.txbURI.Text = "http://" + this.piIpAddress.ToString() + ":8080/?action=stream";
             }
+        }
+
+        private void Button_Click(object sender, RoutedEventArgs e)
+        {
+            PiBlimpPacket packet = new PiBlimpPacket();
+            byte[] packetArray = packet.getPacket(PiBlimpPacketType.SetPWM, MOTOR_CONSTANTS.LEFT_SERVO, 0, throttleValue, MOTOR_CONSTANTS.RIGHT_SERVO, 0, throttleValue);
+            socket.Send(packetArray);
+            this.servoElevationAngle = 0;
+            this.lblElevationAngle.Content = 0;
+        }
+
+        private void btnShutdown_Click(object sender, RoutedEventArgs e)
+        {
+            PiBlimpPacket packet = new PiBlimpPacket();
+            byte[] packetArray = packet.getPacket(PiBlimpPacketType.Shutdown);
+            socket.Send(packetArray);
+            this.servoElevationAngle = 100;
+            this.lblElevationAngle.Content = "100";
+            this.throttleValue = 0;
+            this.lblThrottleValue.Content = "0";
+        }
+
+        private void btnPntUpward_Click(object sender, RoutedEventArgs e)
+        {
+            PiBlimpPacket packet = new PiBlimpPacket();
+            byte[] packetArray = packet.getPacket(PiBlimpPacketType.SetPWM, MOTOR_CONSTANTS.LEFT_SERVO, 100, throttleValue, MOTOR_CONSTANTS.RIGHT_SERVO, 100, throttleValue);
+            socket.Send(packetArray);
+            this.servoElevationAngle = 0;
+            this.lblElevationAngle.Content = 0;
         }
     }
 }

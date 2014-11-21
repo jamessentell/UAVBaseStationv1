@@ -26,6 +26,8 @@
         <Button x:Name="btnDisconnect" Content="Disconnect" Grid.Column="1" HorizontalAlignment="Left" Margin="258,80,0,0" VerticalAlignment="Top" Width="73" Click="btnDisconnect_Click"/>
         <Label Content="IP:" HorizontalAlignment="Left" Margin="398,10,0,0" VerticalAlignment="Top" x:Name="lblURI_Copy"/>
         <TextBox HorizontalAlignment="Left" Height="23" Margin="421,12,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="100" x:Name="txbIpAddress" Text="192.168.1.126" TextChanged="txbIpAddress_TextChanged"/>
+        <Button Content="Point Downward" Grid.Column="1" HorizontalAlignment="Left" Margin="216,222,0,0" VerticalAlignment="Top" Width="95" Click="Button_Click"/>
+        <Button x:Name="btnShutdown" Content="Shutdown" Grid.Column="1" HorizontalAlignment="Left" Margin="225,276,0,0" VerticalAlignment="Top" Width="75" RenderTransformOrigin="-0.2,-0.364" Click="btnShutdown_Click"/>
 
 
     </Grid>

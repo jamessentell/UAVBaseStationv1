@@ -16,7 +16,8 @@ namespace BaseStationv1
         StartVideoStream,
         StopVideoStream,
         RestartVideoStream,
-        KeepAlive
+        KeepAlive,
+        Shutdown
     };
 
     class PiBlimpPacket
@@ -78,15 +79,18 @@ namespace BaseStationv1
                     break;
                 case PiBlimpPacketType.StartVideoStream:
                     bArray[0] = 50;
-                    bArray[0] = 1;
+                    bArray[4] = 1;
                     break;
                 case PiBlimpPacketType.StopVideoStream:
                     bArray[0] = 50;
-                    bArray[1] = 0;
+                    bArray[4] = 0;
                     break;
                 case PiBlimpPacketType.RestartVideoStream:
                     bArray[0] = 50;
-                    bArray[1] = 2;
+                    bArray[4] = 2;
+                    break;
+                case PiBlimpPacketType.Shutdown:
+                    bArray[0] = 75;
                     break;
                 default:
                     break;
