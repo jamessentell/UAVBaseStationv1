@@ -65,6 +65,8 @@ namespace BaseStationv1
         private System.Timers.Timer keepAliveTimer;
         private Boolean constructorRan = false;
         private bool videoStreamUp;
+        private System.Timers.Timer controllerPollTimer;
+        private GamePadConnector connector;
         
         public MainWindow()
         {
@@ -90,12 +92,21 @@ namespace BaseStationv1
             servoElevationAngle = 100;
 
             // Set up socket variable
+            
 
             // Attempt to locate pi address
+            IPAddress[] addresses = null;
+            try
+            {
+                addresses = Dns.GetHostAddresses("piblimp.");
+            }
+            catch(Exception ex)
+            {
+                addresses = null;
+            }
+            
 
-            IPAddress[] addresses = Dns.GetHostAddresses("piblimp.");
-
-            if(addresses.Length > 0)
+            if(addresses != null && addresses.Length > 0)
             {
                 piIpAddress = addresses[0].ToString();
             }
@@ -117,6 +128,9 @@ namespace BaseStationv1
 
             this.constructorRan = true;
             videoStreamUp = false;
+
+            // Initialize GamePadConnector
+            connector = new GamePadConnector();
         }
 
         private void sendKeepAlivePacket(object source, ElapsedEventArgs e)
@@ -186,10 +200,12 @@ namespace BaseStationv1
             streamDecoder.StopStream();
             this.videoStreamUp = false;
         }
+        
 
         // Called when the test button is clicked
         private void btnTest_Click(object sender, RoutedEventArgs e)
         {
+            /*
             PiBlimpPacket packet = new PiBlimpPacket();
             byte[] array1 = packet.getPacket(PiBlimpPacketType.SetPWM, MOTOR_CONSTANTS.LEFT_MOTOR, MOTOR_CONSTANTS.FORWARD, 40);
             socket.Send(array1);
@@ -198,6 +214,101 @@ namespace BaseStationv1
 
             byte[] array2 = packet.getPacket(PiBlimpPacketType.SetPWM, MOTOR_CONSTANTS.LEFT_MOTOR, MOTOR_CONSTANTS.FORWARD, 0);
             socket.Send(array2);
+            */
+
+            // Start controller timer for every 1/100 second
+            this.controllerPollTimer = new System.Timers.Timer(10);
+            this.controllerPollTimer.Enabled = true;
+            this.controllerPollTimer.Elapsed += new ElapsedEventHandler(pollController);
+
+
+            
+
+        }
+
+
+        private void pollController(object source, ElapsedEventArgs e)
+        {
+            State currentState = connector.getControllerState();
+
+            this.lblLeftY.Dispatcher.Invoke(new setLblLeftYContentCallback(this.setLblLeftYContent), new object[] { currentState.Gamepad.LeftThumbY.ToString() });
+            this.lblLeftX.Dispatcher.Invoke(new setLblLeftXContentCallback(this.setLblLeftXContent), new object[] { currentState.Gamepad.LeftThumbX.ToString() });
+            this.lblRightY.Dispatcher.Invoke(new setLblRightYContentCallback(this.setLblRightYContent), new object[] { currentState.Gamepad.RightThumbY.ToString() });
+            this.lblRightX.Dispatcher.Invoke(new setLblRightXContentCallback(this.setLblRightXContent), new object[] { currentState.Gamepad.RightThumbX.ToString() });
+            this.lblRightLowerTrigger.Dispatcher.Invoke(new setLblRightLowerTriggerContentCallback(this.setLblRightLowerTriggerContent), new object[] { currentState.Gamepad.RightTrigger.ToString() });
+
+            double maxThrottle = 50;
+            double deadzone = 4000;
+            double leftThumbY = currentState.Gamepad.LeftThumbY;
+            double leftThrottle = 0;
+
+            if(leftThumbY < deadzone && leftThumbY > -deadzone)
+            {
+                leftThumbY = 0;
+                leftThrottle = 0;
+            }
+            else if(leftThumbY > 4000)
+            {
+                double ratio = (leftThumbY - deadzone) / (32767 - deadzone);
+                leftThrottle = Math.Round(ratio * maxThrottle);
+                
+            }
+            else
+            {
+
+            }
+
+            
+            this.lblLeftMotorThrottle.Dispatcher.Invoke(new setLblLeftMotorThrottleContentCallback(this.setLblLeftMotorThrottleContent), new object[] { Math.Round(leftThrottle).ToString() });
+
+
+
+
+            
+            //this.lblLeftX.Content = currentState.Gamepad.LeftThumbX.ToString();
+            //this.lblLeftY.Content = currentState.Gamepad.LeftThumbY.ToString();
+        }
+
+        public delegate void setLblLeftMotorThrottleContentCallback(string message);
+
+        private void setLblLeftMotorThrottleContent(String content)
+        {
+            this.lblLeftMotorThrottle.Content = content;
+        }
+
+        public delegate void setLblRightLowerTriggerContentCallback(string message);
+
+        private void setLblRightLowerTriggerContent(String content)
+        {
+            this.lblRightLowerTrigger.Content = content;
+        }
+
+        public delegate void setLblRightXContentCallback(string message);
+
+        private void setLblRightXContent(String content)
+        {
+            this.lblRightX.Content = content;
+        }
+
+        public delegate void setLblRightYContentCallback(string message);
+
+        private void setLblRightYContent(String content)
+        {
+            this.lblRightY.Content = content;
+        }
+
+        public delegate void setLblLeftXContentCallback(string message);
+
+        private void setLblLeftXContent(String content)
+        {
+            this.lblLeftX.Content = content;
+        }
+
+        public delegate void setLblLeftYContentCallback(string message);
+
+        private void setLblLeftYContent(String content)
+        {
+            this.lblLeftY.Content = content;
         }
 
         private void btnToggleKeys_Click(object sender, RoutedEventArgs e)
