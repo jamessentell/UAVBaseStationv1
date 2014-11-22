@@ -67,6 +67,15 @@ namespace BaseStationv1
         private bool videoStreamUp;
         private System.Timers.Timer controllerPollTimer;
         private GamePadConnector connector;
+        private ControllerMode controllerMode = ControllerMode.NoSynch;
+        private PiBlimpPacket packetGenerator;
+        int counter = 0;
+        
+        enum ControllerMode
+        {
+            Synch,
+            NoSynch
+        }
         
         public MainWindow()
         {
@@ -131,6 +140,8 @@ namespace BaseStationv1
 
             // Initialize GamePadConnector
             connector = new GamePadConnector();
+
+            packetGenerator = new PiBlimpPacket();
         }
 
         private void sendKeepAlivePacket(object source, ElapsedEventArgs e)
@@ -229,6 +240,7 @@ namespace BaseStationv1
 
         private void pollController(object source, ElapsedEventArgs e)
         {
+            this.counter++;
             State currentState = connector.getControllerState();
 
             this.lblLeftY.Dispatcher.Invoke(new setLblLeftYContentCallback(this.setLblLeftYContent), new object[] { currentState.Gamepad.LeftThumbY.ToString() });
@@ -239,34 +251,142 @@ namespace BaseStationv1
 
             double maxThrottle = 50;
             double deadzone = 4000;
-            double leftThumbY = currentState.Gamepad.LeftThumbY;
+            double leftThumbY = Math.Abs(currentState.Gamepad.LeftThumbY - 1);  // "-1" added to handle the case when negating the min value of a two's complement number.  Loss of precision will be minimal.
+            double rightThumbY = Math.Abs(currentState.Gamepad.RightThumbY - 1);
+            double rightThrottle = 0;
             double leftThrottle = 0;
+            int leftDirection = MOTOR_CONSTANTS.FORWARD; // true = forward
+            int rightDirection = MOTOR_CONSTANTS.FORWARD; // true = forward
 
+            // Check for a thumb button press
+            if(counter == 7)
+            {
+                counter = 0;
+                if (currentState.Gamepad.Buttons.ToString().Contains("RightShoulder"))
+                {
+                    // Toggle mode
+                    if (this.controllerMode == ControllerMode.Synch)
+                    {
+                        this.controllerMode = ControllerMode.NoSynch;
+                    }
+                    else
+                    {
+                        this.controllerMode = ControllerMode.Synch;
+                    }
+                }
+            }            
+
+            // Check for synchronized mode
+            if(this.controllerMode == ControllerMode.Synch)
+            {
+                rightThumbY = leftThumbY;
+            }
+
+            // Left analog stick
             if(leftThumbY < deadzone && leftThumbY > -deadzone)
             {
                 leftThumbY = 0;
                 leftThrottle = 0;
             }
-            else if(leftThumbY > 4000)
+            else
             {
+                // Calculate throttle value
                 double ratio = (leftThumbY - deadzone) / (32767 - deadzone);
                 leftThrottle = Math.Round(ratio * maxThrottle);
-                
+
+                // Set direction
+                if(currentState.Gamepad.LeftThumbY > 0)
+                {
+                    leftDirection = MOTOR_CONSTANTS.FORWARD;
+                }
+                else
+                {
+                    leftDirection = MOTOR_CONSTANTS.REVERSE;
+                }                
+            }
+            
+            // Right analog stick
+            if (rightThumbY < deadzone && rightThumbY > -deadzone)
+            {
+                rightThumbY = 0;
+                rightThrottle = 0;
             }
             else
             {
+                // Calculate throttle value
+                double ratio = (rightThumbY - deadzone) / (32767 - deadzone);
+                rightThrottle = Math.Round(ratio * maxThrottle);
 
+                // Set direction
+                if(controllerMode == ControllerMode.Synch)
+                {
+                    rightDirection = leftDirection;
+                }
+                else
+                {
+                    if (currentState.Gamepad.RightThumbY > 0)
+                    {
+                        rightDirection = MOTOR_CONSTANTS.FORWARD;
+                    }
+                    else
+                    {
+                        rightDirection = MOTOR_CONSTANTS.REVERSE;
+                    }
+                }
+                
             }
 
+            // Right Trigger (Servo elevation angle)
+            double rightTriggerValue = currentState.Gamepad.RightTrigger;
+            rightTriggerValue = rightTriggerValue - 255;
+            rightTriggerValue = Math.Abs(rightTriggerValue);
+            double servoPercent = (rightTriggerValue / 255) * 100;
             
+            // Update left analog stick display values
             this.lblLeftMotorThrottle.Dispatcher.Invoke(new setLblLeftMotorThrottleContentCallback(this.setLblLeftMotorThrottleContent), new object[] { Math.Round(leftThrottle).ToString() });
 
+            if(leftDirection == MOTOR_CONSTANTS.FORWARD)
+            {
+                this.lblLeftMotorDirection.Dispatcher.Invoke(new setLblLeftMotorDirectionContentCallback(this.setLblLeftMotorDirectionContent), new object[] { "F" });
+            }
+            else
+            {
+                this.lblLeftMotorDirection.Dispatcher.Invoke(new setLblLeftMotorDirectionContentCallback(this.setLblLeftMotorDirectionContent), new object[] { "R" });
+            }
 
+            // Update right analog stick display values
+            this.lblRightMotorThrottle.Dispatcher.Invoke(new setLblRightMotorThrottleContentCallback(this.setLblRightMotorThrottleContent), new object[] { Math.Round(rightThrottle).ToString() });
 
+            if(rightDirection == MOTOR_CONSTANTS.FORWARD)
+            {
+                this.lblRightMotorDirection.Dispatcher.Invoke(new setLblRightMotorDirectionContentCallback(this.setLblRightMotorDirectionContent), new object[] { "F" });
+            }
+            else
+            {
+                this.lblRightMotorDirection.Dispatcher.Invoke(new setLblRightMotorDirectionContentCallback(this.setLblRightMotorDirectionContent), new object[] { "R" });
+            }
 
+            // Update servo angle percent display
+            this.lblServoAnglePercent.Dispatcher.Invoke(new setLblServoAnglePercentContentCallback(this.setLblServoAnglePercentContent), new object[] { Math.Round(servoPercent).ToString() });
             
-            //this.lblLeftX.Content = currentState.Gamepad.LeftThumbX.ToString();
-            //this.lblLeftY.Content = currentState.Gamepad.LeftThumbY.ToString();
+            // Create packet and send
+            byte[] array = packetGenerator.getPacket(PiBlimpPacketType.SetPWM, MOTOR_CONSTANTS.LEFT_MOTOR, leftDirection, Convert.ToInt32(leftThrottle), MOTOR_CONSTANTS.RIGHT_MOTOR, rightDirection, Convert.ToInt32(rightThrottle), MOTOR_CONSTANTS.LEFT_SERVO, 0, Convert.ToInt32(servoPercent), MOTOR_CONSTANTS.RIGHT_SERVO, 0, Convert.ToInt32(servoPercent));
+            //socket.Send(array);
+
+        }
+
+        public delegate void setLblServoAnglePercentContentCallback(string message);
+
+        private void setLblServoAnglePercentContent(String content)
+        {
+            this.lblServoAnglePercent.Content = content;
+        }
+
+        public delegate void setLblLeftMotorDirectionContentCallback(string message);
+
+        private void setLblLeftMotorDirectionContent(String content)
+        {
+            this.lblLeftMotorDirection.Content = content;
         }
 
         public delegate void setLblLeftMotorThrottleContentCallback(string message);
@@ -274,6 +394,20 @@ namespace BaseStationv1
         private void setLblLeftMotorThrottleContent(String content)
         {
             this.lblLeftMotorThrottle.Content = content;
+        }
+
+        public delegate void setLblRightMotorDirectionContentCallback(string message);
+
+        private void setLblRightMotorDirectionContent(String content)
+        {
+            this.lblRightMotorDirection.Content = content;
+        }
+
+        public delegate void setLblRightMotorThrottleContentCallback(string message);
+
+        private void setLblRightMotorThrottleContent(String content)
+        {
+            this.lblRightMotorThrottle.Content = content;
         }
 
         public delegate void setLblRightLowerTriggerContentCallback(string message);
