@@ -25,8 +25,8 @@ namespace BaseStationv1
 {
     public class MOTOR_CONSTANTS
     {
-        public const int LEFT_MOTOR = 2;
-        public const int RIGHT_MOTOR = 1;
+        public const int LEFT_MOTOR = 1;
+        public const int RIGHT_MOTOR = 2;
         public const int LEFT_SERVO = 3;
         public const int RIGHT_SERVO = 4;
         public const int FORWARD = 1;
@@ -70,6 +70,7 @@ namespace BaseStationv1
         private ControllerMode controllerMode = ControllerMode.NoSynch;
         private PiBlimpPacket packetGenerator;
         int counter = 0;
+        int counter2 = 0;
         
         enum ControllerMode
         {
@@ -142,6 +143,9 @@ namespace BaseStationv1
             connector = new GamePadConnector();
 
             packetGenerator = new PiBlimpPacket();
+
+            // Check for connection (shouldn't be one) and enable or disable buttons appropriately
+            this.enableControlButtons();
         }
 
         private void sendKeepAlivePacket(object source, ElapsedEventArgs e)
@@ -175,41 +179,57 @@ namespace BaseStationv1
 
         private void btnStartCapture_Click(object sender, RoutedEventArgs e)
         {
-            //this.establishConnection();
-            try
+            if(SocketExtensions.IsConnected(this.socket))
             {
-                // Send packet to start video stream
-                //if(this.videoStreamUp == false)
-                //{
-                PiBlimpPacket packet = new PiBlimpPacket();
-                byte[] array = packet.getPacket(PiBlimpPacketType.StartVideoStream);
-                socket.Send(array);                    
-                //}
-                //else
-                //{
-                //    PiBlimpPacket packet = new PiBlimpPacket();
-                //    byte[] array = packet.getPacket(PiBlimpPacketType.RestartVideoStream);
-                //    socket.Send(array);  
-               //}
-                streamDecoder.ParseStream(new Uri(this.txbURI.Text.ToString()));
-                this.videoStreamUp = true;
+                //this.establishConnection();
+                try
+                {
+                    // Send packet to start video stream
+                    //if(this.videoStreamUp == false)
+                    //{
+                    PiBlimpPacket packet = new PiBlimpPacket();
+                    byte[] array = packet.getPacket(PiBlimpPacketType.StartVideoStream);
+                    socket.Send(array);
+                    //}
+                    //else
+                    //{
+                    //    PiBlimpPacket packet = new PiBlimpPacket();
+                    //    byte[] array = packet.getPacket(PiBlimpPacketType.RestartVideoStream);
+                    //    socket.Send(array);  
+                    //}
+                    streamDecoder.ParseStream(new Uri(this.txbURI.Text.ToString()));
+                    this.videoStreamUp = true;
+                }
+                catch (Exception err)
+                {
+                    // Display error message
+                    System.Windows.MessageBox.Show(err.Message);
+                    this.videoStreamUp = false;
+                }
             }
-            catch(Exception err)
+            else
             {
-                // Display error message
-                System.Windows.MessageBox.Show(err.Message);
-                this.videoStreamUp = false;
-            }            
+                System.Windows.MessageBox.Show("Please connect first.");
+            }
+                        
         }
 
         private void btnStopCapture_Click(object sender, RoutedEventArgs e)
         {
-            // Stop stream
-            PiBlimpPacket packet = new PiBlimpPacket();
-            byte[] array = packet.getPacket(PiBlimpPacketType.StopVideoStream);
-            socket.Send(array);
-            streamDecoder.StopStream();
-            this.videoStreamUp = false;
+            if(SocketExtensions.IsConnected(this.socket))
+            {
+                // Stop stream
+                PiBlimpPacket packet = new PiBlimpPacket();
+                byte[] array = packet.getPacket(PiBlimpPacketType.StopVideoStream);
+                socket.Send(array);
+                streamDecoder.StopStream();
+                this.videoStreamUp = false;
+            }
+            else
+            {
+                System.Windows.MessageBox.Show("Please connect first");
+            }
+            
         }
         
 
@@ -228,9 +248,17 @@ namespace BaseStationv1
             */
 
             // Start controller timer for every 1/100 second
-            this.controllerPollTimer = new System.Timers.Timer(10);
-            this.controllerPollTimer.Enabled = true;
-            this.controllerPollTimer.Elapsed += new ElapsedEventHandler(pollController);
+            if(SocketExtensions.IsConnected(this.socket))
+            {
+                this.controllerPollTimer = new System.Timers.Timer(10);
+                this.controllerPollTimer.Enabled = true;
+                this.controllerPollTimer.Elapsed += new ElapsedEventHandler(pollController);
+            }
+            else
+            {
+                System.Windows.MessageBox.Show("Please connect first.");
+            }
+            
 
 
             
@@ -241,6 +269,7 @@ namespace BaseStationv1
         private void pollController(object source, ElapsedEventArgs e)
         {
             this.counter++;
+            this.counter2++;
             State currentState = connector.getControllerState();
 
             this.lblLeftY.Dispatcher.Invoke(new setLblLeftYContentCallback(this.setLblLeftYContent), new object[] { currentState.Gamepad.LeftThumbY.ToString() });
@@ -249,7 +278,7 @@ namespace BaseStationv1
             this.lblRightX.Dispatcher.Invoke(new setLblRightXContentCallback(this.setLblRightXContent), new object[] { currentState.Gamepad.RightThumbX.ToString() });
             this.lblRightLowerTrigger.Dispatcher.Invoke(new setLblRightLowerTriggerContentCallback(this.setLblRightLowerTriggerContent), new object[] { currentState.Gamepad.RightTrigger.ToString() });
 
-            double maxThrottle = 50;
+            double maxThrottle = 20;
             double deadzone = 4000;
             double leftThumbY = Math.Abs(currentState.Gamepad.LeftThumbY - 1);  // "-1" added to handle the case when negating the min value of a two's complement number.  Loss of precision will be minimal.
             double rightThumbY = Math.Abs(currentState.Gamepad.RightThumbY - 1);
@@ -259,9 +288,9 @@ namespace BaseStationv1
             int rightDirection = MOTOR_CONSTANTS.FORWARD; // true = forward
 
             // Check for a thumb button press
-            if(counter == 7)
+            if(this.counter >= 7)
             {
-                counter = 0;
+                this.counter = 0;
                 if (currentState.Gamepad.Buttons.ToString().Contains("RightShoulder"))
                 {
                     // Toggle mode
@@ -371,7 +400,19 @@ namespace BaseStationv1
             
             // Create packet and send
             byte[] array = packetGenerator.getPacket(PiBlimpPacketType.SetPWM, MOTOR_CONSTANTS.LEFT_MOTOR, leftDirection, Convert.ToInt32(leftThrottle), MOTOR_CONSTANTS.RIGHT_MOTOR, rightDirection, Convert.ToInt32(rightThrottle), MOTOR_CONSTANTS.LEFT_SERVO, 0, Convert.ToInt32(servoPercent), MOTOR_CONSTANTS.RIGHT_SERVO, 0, Convert.ToInt32(servoPercent));
-            //socket.Send(array);
+
+            try
+            {
+                if (this.counter2 >= 10)
+                {
+                    this.counter2 = 0;
+                    socket.Send(array);
+                }  
+            }
+            catch(Exception ex)
+            {
+
+            }
 
         }
 
@@ -594,12 +635,15 @@ namespace BaseStationv1
         private void btnConnect_Click(object sender, RoutedEventArgs e)
         {
             this.establishConnection();
+            
+            // Recheck connection and enable or disable buttons
+            this.enableControlButtons();
         }
 
         // Disconnect from the Pi
         private void btnDisconnect_Click(object sender, RoutedEventArgs e)
         {
-            this.closeConnection();            
+            this.closeConnection();
         }
 
         private bool connectSocket()
@@ -677,13 +721,31 @@ namespace BaseStationv1
             this.lblThrottleValue.Content = "0";
         }
 
-        private void btnPntUpward_Click(object sender, RoutedEventArgs e)
+        private void enableControlButtons()
         {
-            PiBlimpPacket packet = new PiBlimpPacket();
-            byte[] packetArray = packet.getPacket(PiBlimpPacketType.SetPWM, MOTOR_CONSTANTS.LEFT_SERVO, 100, throttleValue, MOTOR_CONSTANTS.RIGHT_SERVO, 100, throttleValue);
-            socket.Send(packetArray);
-            this.servoElevationAngle = 0;
-            this.lblElevationAngle.Content = 0;
+            if(SocketExtensions.IsConnected(this.socket))
+            {
+                // Enable all buttons
+                this.btnTest.IsEnabled = true;
+                this.btnStartCapture.IsEnabled = true;
+                this.btnStopCapture.IsEnabled = true;
+                this.btnShutdown.IsEnabled = true;
+                this.btnDisconnect.IsEnabled = true;
+                this.btnToggleKeys.IsEnabled = true;
+                this.btnPntDownward.IsEnabled = true;
+            }
+            else
+            {
+                // Disable all control buttons except connect button
+                this.btnTest.IsEnabled = false;
+                this.btnStartCapture.IsEnabled = false;
+                this.btnStopCapture.IsEnabled = false;
+                this.btnShutdown.IsEnabled = false;
+                this.btnDisconnect.IsEnabled = false;
+                this.btnToggleKeys.IsEnabled = false;
+                this.btnPntDownward.IsEnabled = false;
+            }
         }
     }
+
 }

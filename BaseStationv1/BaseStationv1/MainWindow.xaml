@@ -6,52 +6,54 @@
         >
     <Grid>
         <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="531*"/>
+            <ColumnDefinition Width="249*"/>
+            <ColumnDefinition Width="282*"/>
             <ColumnDefinition Width="341*"/>
         </Grid.ColumnDefinitions>
         <Label Content="URI:" HorizontalAlignment="Left" Margin="68,10,0,0" VerticalAlignment="Top" Name="lblURI"/>
 
-        <Image HorizontalAlignment="Left" Height="480" Margin="44,44,0,0" VerticalAlignment="Top" Width="640" Name="imgStreamDisplay" Stretch="None" Grid.ColumnSpan="2"/>
-        <TextBox HorizontalAlignment="Left" Height="23" Margin="104,12,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="278" Name="txbURI" Text="http://192.168.1.149:8080/?action=stream"/>
-        <Button Content="Start Capture" HorizontalAlignment="Left" Margin="3,12,0,0" VerticalAlignment="Top" Width="79" Name="btnStartCapture" Click="btnStartCapture_Click" Grid.Column="1"/>
-        <Button Name="btnStopCapture" Content="Stop Capture" HorizontalAlignment="Right" Margin="0,12,174,0" VerticalAlignment="Top" Width="75" Click="btnStopCapture_Click" Grid.Column="1"/>
-        <Button x:Name="btnTest" Content="Enable Xbox Controller" HorizontalAlignment="Left" Margin="199,331,0,0" VerticalAlignment="Top" Width="134" Click="btnTest_Click" Grid.Column="1"/>
-        <Label Content="Control Buttons" HorizontalAlignment="Left" Margin="210,10,0,0" VerticalAlignment="Top" Width="98" Grid.Column="1"/>
-        <Button x:Name="btnToggleKeys" Content="Toggle Key Capture" HorizontalAlignment="Left" Margin="197,64,0,0" VerticalAlignment="Top" Width="134" Click="btnToggleKeys_Click" Grid.Column="1"/>
-        <Label Content="Throttle Value:" HorizontalAlignment="Left" Margin="198,83,0,0" VerticalAlignment="Top" RenderTransformOrigin="-0.046,0.692" Grid.Column="1"/>
-        <Label x:Name="lblThrottleValue" Content="0" HorizontalAlignment="Left" Margin="290,83,0,0" VerticalAlignment="Top" RenderTransformOrigin="2.25,0.462" Width="41" HorizontalContentAlignment="Center" Grid.Column="1"/>
-        <Label Content="Elevation Value" HorizontalAlignment="Left" Margin="198,109,0,0" VerticalAlignment="Top" RenderTransformOrigin="-0.046,0.692" Grid.Column="1"/>
-        <Label x:Name="lblElevationAngle" Content="100" HorizontalAlignment="Left" Margin="290,109,0,0" VerticalAlignment="Top" RenderTransformOrigin="2.25,0.462" Width="41" HorizontalContentAlignment="Center" Grid.Column="1"/>
-        <Button x:Name="btnConnect" Content="Connect" Grid.Column="1" HorizontalAlignment="Left" Margin="198,37,0,0" VerticalAlignment="Top" Width="55" Click="btnConnect_Click"/>
-        <Button x:Name="btnDisconnect" Content="Disconnect" Grid.Column="1" HorizontalAlignment="Left" Margin="258,37,0,0" VerticalAlignment="Top" Width="73" Click="btnDisconnect_Click"/>
-        <Label Content="IP:" HorizontalAlignment="Left" Margin="398,10,0,0" VerticalAlignment="Top" x:Name="lblURI_Copy"/>
-        <TextBox HorizontalAlignment="Left" Height="23" Margin="421,12,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="100" x:Name="txbIpAddress" Text="192.168.1.126" TextChanged="txbIpAddress_TextChanged"/>
-        <Button Content="Point Downward" Grid.Column="1" HorizontalAlignment="Left" Margin="216,132,0,0" VerticalAlignment="Top" Width="95" Click="Button_Click"/>
-        <Button x:Name="btnShutdown" Content="Shutdown" Grid.Column="1" HorizontalAlignment="Left" Margin="228,159,0,0" VerticalAlignment="Top" Width="75" RenderTransformOrigin="-0.2,-0.364" Click="btnShutdown_Click"/>
-        <Label Content="Left Analog Stick:" Grid.Column="1" HorizontalAlignment="Left" Margin="210,182,0,0" VerticalAlignment="Top"/>
-        <Label Content="Y:" Grid.Column="1" HorizontalAlignment="Left" Margin="234,198,0,0" VerticalAlignment="Top"/>
-        <Label Content="X:" Grid.Column="1" HorizontalAlignment="Left" Margin="233,212,0,0" VerticalAlignment="Top"/>
-        <Label x:Name="lblLeftY" Content="Label" Grid.Column="1" HorizontalAlignment="Left" Margin="258,198,0,0" VerticalAlignment="Top"/>
-        <Label x:Name="lblLeftX" Content="Label" Grid.Column="1" HorizontalAlignment="Left" Margin="258,212,0,0" VerticalAlignment="Top"/>
-        <Label Content="Right Analog Stick:" Grid.Column="1" HorizontalAlignment="Left" Margin="205,232,0,0" VerticalAlignment="Top"/>
-        <Label Content="Y:" Grid.Column="1" HorizontalAlignment="Left" Margin="236,249,0,0" VerticalAlignment="Top"/>
-        <Label Content="X:" Grid.Column="1" HorizontalAlignment="Left" Margin="236,264,0,0" VerticalAlignment="Top"/>
-        <Label x:Name="lblRightY" Content="Label" Grid.Column="1" HorizontalAlignment="Left" Margin="255,249,0,0" VerticalAlignment="Top"/>
-        <Label x:Name="lblRightX" Content="Label" Grid.Column="1" HorizontalAlignment="Left" Margin="256,264,0,0" VerticalAlignment="Top"/>
-        <Label Content="Right Lower Trigger:" HorizontalAlignment="Left" Margin="209,282,0,0" VerticalAlignment="Top" Grid.Column="1"/>
-        <Label x:Name="lblRightLowerTrigger" Content="Label" HorizontalAlignment="Left" Margin="247,302,0,0" VerticalAlignment="Top" Grid.Column="1"/>
-        <Label Content="Left Motor:" Grid.Column="1" HorizontalAlignment="Left" Margin="235,358,0,0" VerticalAlignment="Top"/>
-        <Label Content="Direction:" Grid.Column="1" HorizontalAlignment="Left" Margin="218,376,0,0" VerticalAlignment="Top"/>
-        <Label Content="Throttle:" Grid.Column="1" HorizontalAlignment="Left" Margin="224,396,0,0" VerticalAlignment="Top"/>
-        <Label x:Name="lblLeftMotorDirection" Content="Label" Grid.Column="1" HorizontalAlignment="Left" Margin="278,376,0,0" VerticalAlignment="Top"/>
-        <Label x:Name="lblLeftMotorThrottle" Content="Label" Grid.Column="1" HorizontalAlignment="Left" Margin="278,396,0,0" VerticalAlignment="Top"/>
-        <Label Content="Right Motor:" Grid.Column="1" HorizontalAlignment="Left" Margin="234,424,0,0" VerticalAlignment="Top"/>
-        <Label Content="Direction:" Grid.Column="1" HorizontalAlignment="Left" Margin="217,442,0,0" VerticalAlignment="Top"/>
-        <Label Content="Throttle:" Grid.Column="1" HorizontalAlignment="Left" Margin="223,462,0,0" VerticalAlignment="Top"/>
-        <Label x:Name="lblRightMotorDirection" Content="Label" Grid.Column="1" HorizontalAlignment="Left" Margin="277,442,0,0" VerticalAlignment="Top"/>
-        <Label x:Name="lblRightMotorThrottle" Content="Label" Grid.Column="1" HorizontalAlignment="Left" Margin="277,462,0,0" VerticalAlignment="Top"/>
-        <Label Content="Servo Angle %:" Grid.Column="1" HorizontalAlignment="Left" Margin="198,493,0,0" VerticalAlignment="Top"/>
-        <Label x:Name="lblServoAnglePercent" Content="Label" Grid.Column="1" HorizontalAlignment="Left" Margin="279,493,0,0" VerticalAlignment="Top"/>
+        <Image HorizontalAlignment="Left" Height="480" Margin="44,44,0,0" VerticalAlignment="Top" Width="640" Name="imgStreamDisplay" Stretch="None" Grid.ColumnSpan="3"/>
+        <TextBox HorizontalAlignment="Left" Height="23" Margin="104,12,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="278" Name="txbURI" Text="http://192.168.1.149:8080/?action=stream" Grid.ColumnSpan="2"/>
+        <Button Content="Start Capture" HorizontalAlignment="Left" Margin="3,12,0,0" VerticalAlignment="Top" Width="79" Name="btnStartCapture" Click="btnStartCapture_Click" Grid.Column="2"/>
+        <Button Name="btnStopCapture" Content="Stop Capture" HorizontalAlignment="Right" Margin="0,12,174,0" VerticalAlignment="Top" Width="75" Click="btnStopCapture_Click" Grid.Column="2"/>
+        <Button x:Name="btnTest" Content="Enable Xbox Controller" HorizontalAlignment="Left" Margin="199,190,0,0" VerticalAlignment="Top" Width="134" Click="btnTest_Click" Grid.Column="2"/>
+        <Label Content="Control Buttons" HorizontalAlignment="Left" Margin="210,10,0,0" VerticalAlignment="Top" Width="98" Grid.Column="2"/>
+        <Button x:Name="btnToggleKeys" Content="Toggle Key Capture" HorizontalAlignment="Left" Margin="197,64,0,0" VerticalAlignment="Top" Width="134" Click="btnToggleKeys_Click" Grid.Column="2"/>
+        <Label Content="Throttle Value:" HorizontalAlignment="Left" Margin="198,83,0,0" VerticalAlignment="Top" RenderTransformOrigin="-0.046,0.692" Grid.Column="2"/>
+        <Label x:Name="lblThrottleValue" Content="0" HorizontalAlignment="Left" Margin="290,83,0,0" VerticalAlignment="Top" RenderTransformOrigin="2.25,0.462" Width="41" HorizontalContentAlignment="Center" Grid.Column="2"/>
+        <Label Content="Elevation Value" HorizontalAlignment="Left" Margin="198,109,0,0" VerticalAlignment="Top" RenderTransformOrigin="-0.046,0.692" Grid.Column="2"/>
+        <Label x:Name="lblElevationAngle" Content="100" HorizontalAlignment="Left" Margin="290,109,0,0" VerticalAlignment="Top" RenderTransformOrigin="2.25,0.462" Width="41" HorizontalContentAlignment="Center" Grid.Column="2"/>
+        <Button x:Name="btnConnect" Content="Connect" Grid.Column="2" HorizontalAlignment="Left" Margin="198,37,0,0" VerticalAlignment="Top" Width="55" Click="btnConnect_Click"/>
+        <Button x:Name="btnDisconnect" Content="Disconnect" Grid.Column="2" HorizontalAlignment="Left" Margin="258,37,0,0" VerticalAlignment="Top" Width="73" Click="btnDisconnect_Click"/>
+        <Label Content="IP:" HorizontalAlignment="Left" Margin="149,10,0,0" VerticalAlignment="Top" x:Name="lblURI_Copy" Grid.Column="1"/>
+        <TextBox HorizontalAlignment="Left" Height="23" Margin="172,12,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="100" x:Name="txbIpAddress" Text="192.168.1.126" TextChanged="txbIpAddress_TextChanged" Grid.Column="1"/>
+        <Button x:Name="btnPntDownward" Content="Point Downward" Grid.Column="2" HorizontalAlignment="Left" Margin="216,132,0,0" VerticalAlignment="Top" Width="95" Click="Button_Click"/>
+        <Button x:Name="btnShutdown" Content="Shutdown" Grid.Column="2" HorizontalAlignment="Left" Margin="229,424,0,0" VerticalAlignment="Top" Width="75" RenderTransformOrigin="-0.2,-0.364" Click="btnShutdown_Click"/>
+        <Label Content="Left Analog Stick:" Grid.Column="2" HorizontalAlignment="Left" Margin="210,182,0,0" VerticalAlignment="Top" Visibility="Hidden"/>
+        <Label Content="Y:" Grid.Column="2" HorizontalAlignment="Left" Margin="234,198,0,0" VerticalAlignment="Top" Visibility="Hidden"/>
+        <Label Content="X:" Grid.Column="2" HorizontalAlignment="Left" Margin="233,212,0,0" VerticalAlignment="Top" Visibility="Hidden"/>
+        <Label x:Name="lblLeftY" Content="" Grid.Column="2" HorizontalAlignment="Left" Margin="258,198,0,0" VerticalAlignment="Top" Visibility="Hidden"/>
+        <Label x:Name="lblLeftX" Content="" Grid.Column="2" HorizontalAlignment="Left" Margin="258,212,0,0" VerticalAlignment="Top" Visibility="Hidden"/>
+        <Label Content="Right Analog Stick:" Grid.Column="2" HorizontalAlignment="Left" Margin="205,232,0,0" VerticalAlignment="Top" Visibility="Hidden"/>
+        <Label Content="Y:" Grid.Column="2" HorizontalAlignment="Left" Margin="236,249,0,0" VerticalAlignment="Top" Visibility="Hidden"/>
+        <Label Content="X:" Grid.Column="2" HorizontalAlignment="Left" Margin="236,264,0,0" VerticalAlignment="Top" Visibility="Hidden"/>
+        <Label x:Name="lblRightY" Content="" Grid.Column="2" HorizontalAlignment="Left" Margin="255,249,0,0" VerticalAlignment="Top" Visibility="Hidden"/>
+        <Label x:Name="lblRightX" Content="" Grid.Column="2" HorizontalAlignment="Left" Margin="256,264,0,0" VerticalAlignment="Top" Visibility="Hidden"/>
+        <Label Content="Right Lower Trigger:" HorizontalAlignment="Left" Margin="209,282,0,0" VerticalAlignment="Top" Grid.Column="2" Visibility="Hidden"/>
+        <Label x:Name="lblRightLowerTrigger" Content="" HorizontalAlignment="Left" Margin="247,302,0,0" VerticalAlignment="Top" Grid.Column="2" Visibility="Hidden"/>
+        <Label Content="Left Motor:" Grid.Column="2" HorizontalAlignment="Left" Margin="235,217,0,0" VerticalAlignment="Top"/>
+        <Label Content="Direction:" Grid.Column="2" HorizontalAlignment="Left" Margin="218,235,0,0" VerticalAlignment="Top"/>
+        <Label Content="Throttle:" Grid.Column="2" HorizontalAlignment="Left" Margin="224,255,0,0" VerticalAlignment="Top"/>
+        <Label x:Name="lblLeftMotorDirection" Content="0" Grid.Column="2" HorizontalAlignment="Left" Margin="278,235,0,0" VerticalAlignment="Top"/>
+        <Label x:Name="lblLeftMotorThrottle" Content="0" Grid.Column="2" HorizontalAlignment="Left" Margin="278,255,0,0" VerticalAlignment="Top"/>
+        <Label Content="Right Motor:" Grid.Column="2" HorizontalAlignment="Left" Margin="234,283,0,0" VerticalAlignment="Top"/>
+        <Label Content="Direction:" Grid.Column="2" HorizontalAlignment="Left" Margin="217,301,0,0" VerticalAlignment="Top"/>
+        <Label Content="Throttle:" Grid.Column="2" HorizontalAlignment="Left" Margin="223,321,0,0" VerticalAlignment="Top"/>
+        <Label x:Name="lblRightMotorDirection" Content="0" Grid.Column="2" HorizontalAlignment="Left" Margin="277,301,0,0" VerticalAlignment="Top"/>
+        <Label x:Name="lblRightMotorThrottle" Content="0" Grid.Column="2" HorizontalAlignment="Left" Margin="277,321,0,0" VerticalAlignment="Top"/>
+        <Label Content="Servo Angle:" Grid.Column="2" HorizontalAlignment="Left" Margin="198,352,0,0" VerticalAlignment="Top"/>
+        <Label x:Name="lblServoAnglePercent" Content="0" Grid.Column="2" HorizontalAlignment="Left" Margin="279,352,0,0" VerticalAlignment="Top"/>
+        <Label Content="%" Grid.Column="2" HorizontalAlignment="Left" Margin="295,352,0,0" VerticalAlignment="Top"/>
 
 
     </Grid>
