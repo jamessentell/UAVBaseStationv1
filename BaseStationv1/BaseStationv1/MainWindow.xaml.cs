@@ -71,6 +71,8 @@ namespace BaseStationv1
         private PiBlimpPacket packetGenerator;
         int counter = 0;
         int counter2 = 0;
+        private AviFile.AviManager aviManager;
+        private AviFile.VideoStream videoStream;
         
         enum ControllerMode
         {
@@ -146,6 +148,12 @@ namespace BaseStationv1
 
             // Check for connection (shouldn't be one) and enable or disable buttons appropriately
             this.enableControlButtons();
+
+            // Instantiate avi manager
+            //this.aviManager = new AviFile.AviManager("C:\\Users\\James\\Working Folder\\Senior Design\\Captured Videos\\Latest", false);
+
+
+
         }
 
         private void sendKeepAlivePacket(object source, ElapsedEventArgs e)
@@ -168,6 +176,7 @@ namespace BaseStationv1
         private void mjpeg_FrameReady(object sender, FrameReadyEventArgs e)
         {
             this.imgStreamDisplay.Source = e.BitmapImage;
+            //videoStream.AddFrame(e.Bitmap);
         }
 
         // Event handler for MjpegDecoder error
@@ -198,6 +207,11 @@ namespace BaseStationv1
                     //    socket.Send(array);  
                     //}
                     streamDecoder.ParseStream(new Uri(this.txbURI.Text.ToString()));
+
+                    // Set up file writer
+                    // Instantiate video stream
+                    //this.videoStream = aviManager.AddVideoStream(false, 2, null);
+
                     this.videoStreamUp = true;
                 }
                 catch (Exception err)
@@ -223,6 +237,7 @@ namespace BaseStationv1
                 byte[] array = packet.getPacket(PiBlimpPacketType.StopVideoStream);
                 socket.Send(array);
                 streamDecoder.StopStream();
+                //videoStream.Close();
                 this.videoStreamUp = false;
             }
             else
@@ -278,7 +293,7 @@ namespace BaseStationv1
             this.lblRightX.Dispatcher.Invoke(new setLblRightXContentCallback(this.setLblRightXContent), new object[] { currentState.Gamepad.RightThumbX.ToString() });
             this.lblRightLowerTrigger.Dispatcher.Invoke(new setLblRightLowerTriggerContentCallback(this.setLblRightLowerTriggerContent), new object[] { currentState.Gamepad.RightTrigger.ToString() });
 
-            double maxThrottle = 20;
+            double maxThrottle = 30;
             double deadzone = 4000;
             double leftThumbY = Math.Abs(currentState.Gamepad.LeftThumbY - 1);  // "-1" added to handle the case when negating the min value of a two's complement number.  Loss of precision will be minimal.
             double rightThumbY = Math.Abs(currentState.Gamepad.RightThumbY - 1);
@@ -634,6 +649,7 @@ namespace BaseStationv1
         // Establish the TCP Connection
         private void btnConnect_Click(object sender, RoutedEventArgs e)
         {
+            // Establish a connection
             this.establishConnection();
             
             // Recheck connection and enable or disable buttons
@@ -643,7 +659,11 @@ namespace BaseStationv1
         // Disconnect from the Pi
         private void btnDisconnect_Click(object sender, RoutedEventArgs e)
         {
+            // Close the connection
             this.closeConnection();
+
+            // Disable all buttons
+            this.enableControlButtons();
         }
 
         private bool connectSocket()
